@@ -22,7 +22,7 @@ export function useTransactions(params?: { startDate?: string; endDate?: string 
 
 export function useTodos(filter?: { completed?: boolean }) {
   const queryString = filter
-    ? `?${new URLSearchParams(Object.entries(filter).filter(([, v]) => v !== undefined) as [string, string][]).toString()}`
+    ? `?${new URLSearchParams(Object.entries(filter).filter(([, v]) => v !== undefined).map(([k, v]) => [k, String(v)]) as [string, string][]).toString()}`
     : '';
   const { data, error, isLoading, mutate } = useSWR(`/api/todos${queryString}`, fetcher);
   return { todos: data?.data || [], error, isLoading, mutateTodos: mutate };

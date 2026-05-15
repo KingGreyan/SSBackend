@@ -1,11 +1,12 @@
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function PUT(
+export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createServerClient()
+  const { id } = await params
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -29,7 +30,7 @@ export async function PUT(
       type,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .select()
     .single()
@@ -46,9 +47,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createServerClient()
+  const { id } = await params
+  const supabase = await createClient()
 
   const {
     data: { user },
@@ -64,7 +66,7 @@ export async function DELETE(
   const { error } = await supabase
     .from('categories')
     .delete()
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
 
   if (error) {
