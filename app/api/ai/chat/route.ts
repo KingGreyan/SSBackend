@@ -26,12 +26,16 @@ export async function POST(request: NextRequest) {
 
   try {
     // Fetch user's recent transactions for context
-    const { data: transactions } = await supabase
+    const { data: transactions, error: transError } = await supabase
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
       .order('date', { ascending: false })
       .limit(10)
+
+    if (transError) {
+      console.error('[v0] Error fetching transactions:', transError)
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -42,6 +46,7 @@ export async function POST(request: NextRequest) {
     const geminiApiKey = process.env.GEMINI_API_KEY
 
     if (!geminiApiKey) {
+      console.error('[v0] GEMINI_API_KEY not configured')
       return NextResponse.json(
         { error: 'AI service not configured' },
         { status: 500 }
@@ -51,8 +56,8 @@ export async function POST(request: NextRequest) {
     // Call Gemini API with context about user's spending
     const systemPrompt = `You are a personal finance AI assistant. The user is ${profile?.full_name || 'a user'} and has made the following recent transactions: ${JSON.stringify(transactions || [])}. Help them with spending insights, budgeting advice, and financial recommendations based on their transaction history.`
 
-    // UPDATED: Changed model from 'gemini-pro' to 'gemini-1.5-flash'
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', {
+    // Use v1 API endpoint with a stable model name
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +80,7 @@ export async function POST(request: NextRequest) {
       const errorData = await response.json()
       console.error('[v0] Gemini API error:', errorData)
       return NextResponse.json(
-        { error: 'Failed to get AI response' },
+        { error: 'Failed to get AI response', details: errorData },
         { status: response.status }
       )
     }
@@ -88,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ response: aiResponse })
   } catch (error) {
-    console.error('[v0] Error in AI chat:', error)
+    console.error('[v0] Error in AI chat:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

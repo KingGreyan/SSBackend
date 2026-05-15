@@ -40,13 +40,14 @@ export async function GET(request: NextRequest) {
   const { data: transactions, error } = await query.order('date', { ascending: false })
 
   if (error) {
+    console.error('[v0] Error fetching transactions:', error)
     return NextResponse.json(
-      { error: error.message },
+      { error: error.message || 'Failed to fetch transactions' },
       { status: 500 }
     )
   }
 
-  return NextResponse.json(transactions)
+  return NextResponse.json(transactions || [])
 }
 
 export async function POST(request: NextRequest) {
@@ -87,8 +88,9 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) {
+    console.error('[v0] Error creating transaction:', error)
     return NextResponse.json(
-      { error: error.message },
+      { error: error.message || 'Failed to create transaction' },
       { status: 500 }
     )
   }
