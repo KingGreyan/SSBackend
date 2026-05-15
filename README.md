@@ -1,64 +1,208 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Smart Spending - AI-Powered Personal Finance Manager
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern web application for managing personal finances with AI-powered insights and recommendations.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Transaction Management**: Add, track, and organize your income and expenses
+- **Smart Categories**: Create and manage spending categories with color coding
+- **Budget Tracking**: Set and monitor budgets to control your spending
+- **AI Chat Assistant**: Get personalized spending insights and recommendations powered by Google Gemini
+- **Todo Management**: Track financial goals and tasks with priority levels
+- **Dashboard Analytics**: View spending trends, expense breakdowns, and financial overview
+- **User Authentication**: Secure login with email and password via Supabase Auth
+- **Responsive Design**: Beautiful UI that works seamlessly on desktop and mobile devices
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Frontend**: React 18 + Next.js 15 with TypeScript
+- **Styling**: Tailwind CSS with custom design tokens
+- **Database**: Supabase (PostgreSQL) with Row Level Security
+- **Authentication**: Supabase Auth
+- **AI Integration**: Google Gemini API
+- **Deployment**: Vercel
+- **Package Manager**: pnpm
 
-## Learning Laravel
+## Getting Started
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Prerequisites
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Node.js 18+ and pnpm
+- Supabase account and project
+- Google Gemini API key
 
-## Laravel Sponsors
+### Installation
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd smart-spending
+```
 
-### Premium Partners
+2. Install dependencies:
+```bash
+pnpm install
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+3. Set up environment variables in your Vercel dashboard:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+4. Start the development server:
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## Project Structure
+
+```
+smart-spending/
+├── app/
+│   ├── api/                 # API routes for backend operations
+│   │   ├── ai/             # AI chat endpoint
+│   │   ├── categories/      # Category CRUD
+│   │   ├── profile/        # User profile management
+│   │   ├── todos/          # Todo CRUD
+│   │   └── transactions/   # Transaction CRUD
+│   ├── auth/               # Authentication pages
+│   │   ├── callback/       # OAuth callback
+│   │   ├── login/          # Login page
+│   │   ├── sign-up/        # Sign up page
+│   │   └── error/          # Auth error page
+│   ├── dashboard/          # Main dashboard
+│   ├── transactions/       # Transaction management
+│   ├── categories/         # Category management
+│   ├── todos/              # Todo management
+│   ├── ai-chat/            # AI chat interface
+│   ├── profile/            # User profile
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Home page
+│   └── globals.css         # Global styles with design tokens
+├── lib/
+│   ├── hooks/              # Custom React hooks
+│   │   └── useData.ts      # Data fetching hooks with SWR
+│   └── supabase/           # Supabase configuration
+│       ├── client.ts       # Browser client
+│       ├── server.ts       # Server client
+│       └── proxy.ts        # Proxy configuration
+├── middleware.ts           # Next.js middleware
+├── tailwind.config.ts      # Tailwind CSS configuration
+└── tsconfig.json           # TypeScript configuration
+```
+
+## Database Schema
+
+### Tables
+
+- **profiles**: User profile information
+- **categories**: Transaction categories (Income/Expense)
+- **transactions**: Financial transactions
+- **budgets**: Budget limits and tracking
+- **todos**: Task management for financial goals
+
+All tables include Row Level Security (RLS) policies to ensure users can only access their own data.
+
+## API Routes
+
+### Authentication
+- `POST /api/auth/callback` - OAuth callback handler
+
+### Profile
+- `GET /api/profile` - Get user profile
+- `PATCH /api/profile` - Update user profile
+
+### Categories
+- `GET /api/categories` - List user categories
+- `POST /api/categories` - Create category
+- `PATCH /api/categories/[id]` - Update category
+- `DELETE /api/categories/[id]` - Delete category
+
+### Transactions
+- `GET /api/transactions` - List transactions
+- `POST /api/transactions` - Create transaction
+- `PATCH /api/transactions/[id]` - Update transaction
+- `DELETE /api/transactions/[id]` - Delete transaction
+
+### Todos
+- `GET /api/todos` - List todos
+- `POST /api/todos` - Create todo
+- `PATCH /api/todos/[id]` - Update todo
+- `DELETE /api/todos/[id]` - Delete todo
+
+### AI
+- `POST /api/ai/chat` - Chat with AI assistant
+
+## Features in Detail
+
+### Dashboard
+View your financial overview with:
+- Total income and expenses
+- Current balance
+- Expenses by category
+- Recent transactions
+- Quick navigation to all features
+
+### Transaction Management
+- Add income and expense transactions
+- Categorize transactions
+- Filter by date range
+- Edit and delete transactions
+- View transaction history
+
+### AI Chat Assistant
+- Get spending insights and patterns
+- Receive personalized recommendations
+- Ask questions about your finances
+- Get tips for saving money
+
+### Todo Manager
+- Create financial goals and tasks
+- Set priority levels (Low, Medium, High)
+- Add due dates
+- Filter by completion status
+- Track progress on financial objectives
+
+## Security Features
+
+- **Row Level Security**: All database tables protected with RLS policies
+- **Secure Authentication**: Password-based authentication with email verification
+- **Environment Variables**: Sensitive keys stored securely
+- **HTTPS Only**: All communications encrypted in transit
+- **Input Validation**: Server-side validation on all API endpoints
+
+## Deployment
+
+The app is ready to deploy on Vercel:
+
+1. Push your code to GitHub
+2. Connect your GitHub repository to Vercel
+3. Set environment variables in Vercel dashboard
+4. Deploy with a single click
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open source and available under the MIT License.
+
+## Support
+
+For support, please open an issue on GitHub or contact the development team.
+
+## Future Enhancements
+
+- Recurring transactions
+- Advanced analytics and charts
+- Budget alerts and notifications
+- Data export (CSV, PDF)
+- Multi-currency support
+- Investment tracking
+- Bill reminders
+- Savings goals
