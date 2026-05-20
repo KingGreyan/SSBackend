@@ -56,25 +56,44 @@ export async function POST(request: NextRequest) {
     // Call Gemini API with context about user's spending
     const systemPrompt = `You are a personal finance AI assistant. The user is ${profile?.full_name || 'a user'} and has made the following recent transactions: ${JSON.stringify(transactions || [])}. Help them with spending insights, budgeting advice, and financial recommendations based on their transaction history.`
 
-    // Use v1 API endpoint with a stable model name
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': geminiApiKey,
-      },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
+    // Use Gemini API v1 endpoint with proper payload structure
+    const requestPayload = {
+      systemInstruction: {
+        role: 'user',
+        parts: [
           {
-            role: 'user',
-            parts: [{ text: message }],
+            text: systemPrompt,
           },
         ],
-      }),
-    })
+      },
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: message,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+      },
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      }
+    )
 
     if (!response.ok) {
       const errorData = await response.json()
