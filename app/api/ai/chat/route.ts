@@ -39,40 +39,44 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    const geminiApiKey = process.env.GEMINI_API_KEY
+    const groqApiKey = process.env.GROQ_API_KEY
 
-    if (!geminiApiKey) {
+    if (!groqApiKey) {
       return NextResponse.json(
         { error: 'AI service not configured' },
         { status: 500 }
       )
     }
 
-    // Call Gemini API with context about user's spending
+    // Call Groq API with context about user's spending
     const systemPrompt = `You are a personal finance AI assistant. The user is ${profile?.full_name || 'a user'} and has made the following recent transactions: ${JSON.stringify(transactions || [])}. Help them with spending insights, budgeting advice, and financial recommendations based on their transaction history.`
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': geminiApiKey,
+        'Authorization': `Bearer ${groqApiKey}`,
       },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
+        model: 'mixtral-8x7b-32768',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
           {
             role: 'user',
-            parts: [{ text: message }],
+            content: message,
           },
         ],
+        temperature: 0.7,
+        max_tokens: 1024,
       }),
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('[v0] Gemini API error:', errorData)
+      console.error('[v0] Groq API error:', errorData)
       return NextResponse.json(
         { error: 'Failed to get AI response' },
         { status: response.status }
@@ -82,10 +86,10 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
 
     const aiResponse =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      data.choices?.[0]?.message?.content ||
       'I could not generate a response. Please try again.'
 
-    return NextResponse.json({ response: aiResponse })
+    return NextResponse.json({ reply: aiResponse })
   } catch (error) {
     console.error('[v0] Error in AI chat:', error)
     return NextResponse.json(

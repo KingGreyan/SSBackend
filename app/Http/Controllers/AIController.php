@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\GeminiService;
+use App\Services\GroqService;
 use App\Models\CategoryBudget;
 use Illuminate\Support\Facades\Crypt;
 
 class AIController extends Controller
 {
     /**
-     * Save or update user's Gemini API key
+     * Save or update user's Groq API key
      */
     public function saveApiKey(Request $request)
     {
@@ -19,7 +19,7 @@ class AIController extends Controller
         ]);
 
         $user = auth()->user();
-        $user->gemini_api_key = Crypt::encryptString($request->api_key);
+        $user->groq_api_key = Crypt::encryptString($request->api_key);
         $user->save();
 
         return response()->json([
@@ -35,7 +35,7 @@ class AIController extends Controller
     {
         $user = auth()->user();
         return response()->json([
-            'has_api_key' => !empty($user->gemini_api_key),
+            'has_api_key' => !empty($user->groq_api_key),
         ]);
     }
 
@@ -45,10 +45,10 @@ class AIController extends Controller
     public function testApiConnection()
     {
         $user = auth()->user();
-        $apiKey = !empty($user->gemini_api_key) ? Crypt::decryptString($user->gemini_api_key) : null;
+        $apiKey = !empty($user->groq_api_key) ? Crypt::decryptString($user->groq_api_key) : null;
         
-        $gemini = new GeminiService($apiKey);
-        $result = $gemini->testConnection();
+        $groq = new GroqService($apiKey);
+        $result = $groq->testConnection();
         
         return response()->json($result);
     }
@@ -102,9 +102,9 @@ class AIController extends Controller
             'categoryStats' => $categoryStats,
         ];
 
-        $apiKey = !empty($user->gemini_api_key) ? Crypt::decryptString($user->gemini_api_key) : null;
-        $gemini = new GeminiService($apiKey);
-        $insights = $gemini->getFinancialInsights($userData);
+        $apiKey = !empty($user->groq_api_key) ? Crypt::decryptString($user->groq_api_key) : null;
+        $groq = new GroqService($apiKey);
+        $insights = $groq->getFinancialInsights($userData);
 
         return response()->json([
             'insights' => $insights,
@@ -133,9 +133,9 @@ class AIController extends Controller
                 ];
             });
 
-        $apiKey = !empty($user->gemini_api_key) ? Crypt::decryptString($user->gemini_api_key) : null;
-        $gemini = new GeminiService($apiKey);
-        $analysis = $gemini->analyzeSpending($transactions);
+        $apiKey = !empty($user->groq_api_key) ? Crypt::decryptString($user->groq_api_key) : null;
+        $groq = new GroqService($apiKey);
+        $analysis = $groq->analyzeSpending($transactions);
 
         return response()->json([
             'analysis' => $analysis,
@@ -166,9 +166,9 @@ class AIController extends Controller
             })
             ->values();
 
-        $apiKey = !empty($user->gemini_api_key) ? Crypt::decryptString($user->gemini_api_key) : null;
-        $gemini = new GeminiService($apiKey);
-        $recommendations = $gemini->getBudgetRecommendations($spendingData);
+        $apiKey = !empty($user->groq_api_key) ? Crypt::decryptString($user->groq_api_key) : null;
+        $groq = new GroqService($apiKey);
+        $recommendations = $groq->getBudgetRecommendations($spendingData);
 
         return response()->json([
             'recommendations' => $recommendations,
@@ -197,11 +197,11 @@ class AIController extends Controller
             'monthlyExpenses' => $user->transactions()->where('type', 'expense')->whereMonth('date', now()->month)->sum('amount'),
         ];
 
-        $apiKey = !empty($user->gemini_api_key) ? Crypt::decryptString($user->gemini_api_key) : null;
-        $gemini = new GeminiService($apiKey);
+        $apiKey = !empty($user->groq_api_key) ? Crypt::decryptString($user->groq_api_key) : null;
+        $groq = new GroqService($apiKey);
         
         // 2. First Pass: Ask AI
-        $response = $gemini->chat($request->message, $context);
+        $response = $groq->chat($request->message, $context);
 
         // 3. Check for Tool Use (JSON)
         $toolData = $this->parseToolCall($response);
@@ -211,8 +211,8 @@ class AIController extends Controller
             $toolResult = $this->executeTool($toolData['tool'], $toolData['params'] ?? []);
             
             // 4. Second Pass: Re-prompt with Data
-            // We pass 'tool_result' which triggers the "Final Answer" logic in GeminiService
-            $finalResponse = $gemini->chat($request->message, ['tool_result' => $toolResult]);
+            // We pass 'tool_result' which triggers the "Final Answer" logic in GroqService
+            $finalResponse = $groq->chat($request->message, ['tool_result' => $toolResult]);
             
             // SAFETY CHECK: If final response still looks like a tool call, force a text response
             $secondTool = $this->parseToolCall($finalResponse);
